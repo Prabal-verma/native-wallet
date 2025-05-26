@@ -7,6 +7,8 @@ dotenv.config();
 
 const PORT = process.env.PORT;
 
+app.use(express.json());
+
 async function dbinit(){
   try {
     await sql`CREATE TABLE IF NOT EXISTS transcations(
@@ -24,8 +26,25 @@ async function dbinit(){
   }
 }
 
-app.get("/", (req,res)=>{
-  res.send("working");
+
+app.post("/api/transactions",async(req,res)=>{
+   try {
+    const{title,amount,category,user_id}=req.body;
+    if(!title || !category || !user_id || amount === undefined){
+      return res.status(400).json({message: "All fields are Required"});
+    }
+
+    const transaction = await sql`
+    INSERT INTO transcations(user_id, title, amount, category)
+    VALUES (${user_id}, ${title}, ${amount}, ${category})
+    RETURNING *
+    `
+
+    console.log(transaction);
+    res.status(201).json(transaction[0]);
+   } catch (error) {
+    res.status(500).json({message: "Internal Server Error in api"});
+   }
 })
 
 dbinit().then(()=>{
