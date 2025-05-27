@@ -1,12 +1,13 @@
 import express from "express";
 import dotenv from "dotenv"
 import { sql } from "./config/dbconfig.js";
+import ratelimiter from "./middleware/ratelimitter.js";
 
 const app = express();
 dotenv.config();
 
 const PORT = process.env.PORT;
-
+app.use(ratelimiter)
 app.use(express.json());
 
 async function dbinit(){
